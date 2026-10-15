@@ -1,0 +1,197 @@
+/* ==========================================
+   RESET Y CONFIGURACIÓN BASE
+   ========================================== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background-color: #0f172a; /* Fondo oscuro elegante para todo el sitio */
+  color: #f8fafc;
+  min-height: 100vh;
+}
+
+/* ==========================================
+   BARRA DE NAVEGACIÓN (NAVBAR)
+   ========================================== */
+nav {
+  background-color: #1e293b;
+  border-bottom: 1px solid #334155;
+  padding: 1.25rem 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto 2.5rem auto;
+  border-radius: 0 0 16px 16px;
+}
+
+nav h1 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.5px;
+}
+
+nav div {
+  display: flex;
+  gap: 1rem;
+}
+
+/* Transformación de los enlaces en Botones Profesionales */
+nav a {
+  display: inline-block;
+  padding: 0.6rem 1.4rem;
+  background-color: #334155;
+  color: #f8fafc;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border-radius: 10px;
+  border: 1px solid #475569;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+nav a:hover {
+  background-color: #4f46e5; /* Color índigo al pasar el mouse */
+  color: #ffffff;
+  border-color: #6366f1;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+}
+
+/* Estilo para el botón activo según la ruta */
+nav a.router-link-active {
+  background-color: #4f46e5;
+  border-color: #818cf8;
+  color: #ffffff;
+}
+
+/* ==========================================
+   CONTENEDOR Y TÍTULOS PRINCIPALES (CENTRADO)
+   ========================================== */
+main, div > div {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  text-align: center; /* Centra todo el contenido */
+}
+
+h2 {
+  font-size: 2.2rem;
+  font-weight: 800;
+  margin-bottom: 2rem;
+  color: #ffffff;
+  letter-spacing: -0.5px;
+  text-align: center;
+}
+
+/* ==========================================
+   TARJETA DE OCUPACIÓN / RESUMEN
+   ========================================== */
+.bg-indigo-100, 
+div:has(> .text-2xl) > div:first-child {
+  display: inline-block;
+  background: linear-gradient(135deg, #312e81 0%, #1e1b4b 100%);
+  border: 1px solid #4338ca;
+  color: #e0e7ff;
+  padding: 1rem 2.5rem;
+  border-radius: 16px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 2.5rem;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* ==========================================
+   CUADRÍCULA Y TARJETAS DE HABITACIONES
+   ========================================== */
+/* Convierte la lista desordenada en una cuadrícula moderna centrada */
+.grid, div:has(> div > .font-bold) {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)) !important;
+  gap: 1.75rem !important;
+  justify-content: center;
+  align-items: stretch;
+  margin-top: 1rem;
+}
+
+/* Estilo individual para cada Habitación (Tarjeta Interactiva) */
+.grid > div, div:has(> .font-bold) > div {
+  background-color: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 16px;
+  padding: 1.5rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  cursor: pointer;
+}
+
+.grid > div:hover, div:has(> .font-bold) > div:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+  border-color: #6366f1;
+}
+
+/* Encabezado e información de cada habitación */
+.grid span.text-lg, div:has(> .font-bold) > div span {
+  display: block;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 0.5rem;
+}
+
+/* Badge de Estado (Disponible / Ocupada) */
+.grid span.text-xs, .px-2 {
+  display: inline-block !important;
+  padding: 0.35rem 0.8rem !important;
+  border-radius: 20px !important;
+  font-weight: 700 !important;
+  font-size: 0.75rem !important;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 0.25rem;
+}
+
+/* Colores dinámicos según disponibilidad */
+.border-green-500, .bg-green-100 {
+  background-color: rgba(16, 185, 129, 0.15) !important;
+  color: #34d399 !important;
+  border: 1px solid #059669 !important;
+}
+
+.border-red-500, .bg-red-100 {
+  background-color: rgba(239, 68, 68, 0.15) !important;
+  color: #f87171 !important;
+  border: 1px solid #dc2626 !important;
+}
+
+/* Textos dentro de la tarjeta */
+p {
+  color: #94a3b8;
+  margin-bottom: 0.4rem;
+  font-size: 0.95rem;
+}
+
+p span, p strong {
+  color: #f1f5f9;
+  font-weight: 600;
+}
+
+/* Precio en la tarjeta */
+.text-indigo-600, p:last-child {
+  color: #818cf8 !important;
+  font-size: 1.35rem !important;
+  font-weight: 800 !important;
+  margin-top: 0.75rem;
+}

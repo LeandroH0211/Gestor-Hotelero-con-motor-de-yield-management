@@ -1,0 +1,15 @@
+# Dependencias
+node_modules/
+client/node_modules/
+
+# Entornos y variables sensibles
+.env
+
+# Compilación y producción de Vite o Node
+client/dist/
+dist/
+
+# Logs de npm
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*

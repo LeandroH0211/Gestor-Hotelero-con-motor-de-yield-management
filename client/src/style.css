@@ -1,197 +1,217 @@
-/* ==========================================
-   RESET Y CONFIGURACIÓN BASE
-   ========================================== */
-* {
-  box-sizing: border-box;
+/* --- CONFIGURACIÓN GLOBAL Y FONDO --- */
+body {
   margin: 0;
   padding: 0;
-}
-
-body {
   font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-  background-color: #0f172a; /* Fondo oscuro elegante para todo el sitio */
+  background:
+    linear-gradient(rgba(15, 23, 42, 0.88), rgba(15, 23, 42, 0.95)),
+    url('https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1920&auto=format&fit=crop') no-repeat center center fixed;
+  background-size: cover;
   color: #f8fafc;
   min-height: 100vh;
 }
 
-/* ==========================================
-   BARRA DE NAVEGACIÓN (NAVBAR)
-   ========================================== */
-nav {
-  background-color: #1e293b;
-  border-bottom: 1px solid #334155;
-  padding: 1.25rem 2rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+#app-layout {
+  min-height: 100vh;
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: center;
-  max-width: 1200px;
-  margin: 0 auto 2.5rem auto;
+  /* Centra horizontalmente todo el contenido */
+}
+
+/* --- NAV Y ENCABEZADOS CENTRADOS --- */
+.navbar {
+  width: 100%;
+  max-width: 1100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem 1rem;
+  gap: 1rem;
+  background: rgba(30, 41, 59, 0.6);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 1.5rem;
   border-radius: 0 0 16px 16px;
 }
 
-nav h1 {
-  font-size: 1.5rem;
+.nav-brand h1 {
+  font-size: 2rem;
   font-weight: 800;
-  color: #ffffff;
+  margin: 0;
+  text-align: center;
   letter-spacing: -0.5px;
+  background: linear-gradient(135deg, #ffffff 0%, #a5b4fc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-nav div {
+.nav-links {
   display: flex;
   gap: 1rem;
+  justify-content: center;
 }
 
-/* Transformación de los enlaces en Botones Profesionales */
-nav a {
-  display: inline-block;
+.nav-btn {
+  background: rgba(99, 102, 241, 0.15);
+  border: 1px solid rgba(99, 102, 241, 0.4);
+  color: #e0e7ff;
   padding: 0.6rem 1.4rem;
-  background-color: #334155;
-  color: #f8fafc;
+  border-radius: 10px;
   text-decoration: none;
   font-weight: 600;
-  font-size: 0.9rem;
-  border-radius: 10px;
-  border: 1px solid #475569;
-  transition: all 0.25s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  font-size: 0.95rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-nav a:hover {
-  background-color: #4f46e5; /* Color índigo al pasar el mouse */
+.nav-btn:hover,
+.router-link-active {
+  background: #6366f1;
   color: #ffffff;
-  border-color: #6366f1;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
 }
 
-/* Estilo para el botón activo según la ruta */
-nav a.router-link-active {
-  background-color: #4f46e5;
-  border-color: #818cf8;
-  color: #ffffff;
+.main-content {
+  width: 100%;
+  max-width: 1100px;
+  padding: 0 1rem 3rem 1rem;
+  display: flex;
+  justify-content: center;
 }
 
-/* ==========================================
-   CONTENEDOR Y TÍTULOS PRINCIPALES (CENTRADO)
-   ========================================== */
-main, div > div {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 1.5rem;
-  text-align: center; /* Centra todo el contenido */
-}
-
-h2 {
-  font-size: 2.2rem;
-  font-weight: 800;
-  margin-bottom: 2rem;
-  color: #ffffff;
-  letter-spacing: -0.5px;
+/* --- VISTA CUARTELERÍA CENTRADA CON ANIMACIONES --- */
+.dashboard-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
 }
 
-/* ==========================================
-   TARJETA DE OCUPACIÓN / RESUMEN
-   ========================================== */
-.bg-indigo-100, 
-div:has(> .text-2xl) > div:first-child {
-  display: inline-block;
-  background: linear-gradient(135deg, #312e81 0%, #1e1b4b 100%);
-  border: 1px solid #4338ca;
-  color: #e0e7ff;
-  padding: 1rem 2.5rem;
-  border-radius: 16px;
-  font-size: 1.25rem;
+.dashboard-header {
+  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.dashboard-header h2 {
+  font-size: 1.8rem;
+  margin: 0;
   font-weight: 700;
-  margin-bottom: 2.5rem;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
 }
 
-/* ==========================================
-   CUADRÍCULA Y TARJETAS DE HABITACIONES
-   ========================================== */
-/* Convierte la lista desordenada en una cuadrícula moderna centrada */
-.grid, div:has(> div > .font-bold) {
-  display: grid !important;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)) !important;
-  gap: 1.75rem !important;
-  justify-content: center;
-  align-items: stretch;
-  margin-top: 1rem;
+.stats-badge {
+  background: rgba(30, 41, 59, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0.5rem 1.25rem;
+  border-radius: 9999px;
+  font-size: 0.95rem;
+  color: #cbd5e1;
 }
 
-/* Estilo individual para cada Habitación (Tarjeta Interactiva) */
-.grid > div, div:has(> .font-bold) > div {
-  background-color: #1e293b;
-  border: 1px solid #334155;
+.stats-badge strong {
+  color: #4ade80;
+}
+
+/* REJILLA Y TARJETAS ANIMADAS DE HABITACIONES */
+.rooms-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 1000px;
+}
+
+.room-card {
+  background: rgba(30, 41, 59, 0.75);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
   padding: 1.5rem;
-  text-align: center;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
-  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-  cursor: pointer;
+  text-align: left;
+
+  /* Animación suave */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
 }
 
-.grid > div:hover, div:has(> .font-bold) > div:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
-  border-color: #6366f1;
+/* EFECTO DE ANIMACIÓN HOVER */
+.room-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  border-color: rgba(99, 102, 241, 0.6);
+  box-shadow: 0 20px 30px -10px rgba(99, 102, 241, 0.25);
+  background: rgba(30, 41, 59, 0.85);
 }
 
-/* Encabezado e información de cada habitación */
-.grid span.text-lg, div:has(> .font-bold) > div span {
-  display: block;
-  font-size: 1.2rem;
-  font-weight: 700;
+.room-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.room-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
   color: #ffffff;
-  margin-bottom: 0.5rem;
 }
 
-/* Badge de Estado (Disponible / Ocupada) */
-.grid span.text-xs, .px-2 {
-  display: inline-block !important;
-  padding: 0.35rem 0.8rem !important;
-  border-radius: 20px !important;
-  font-weight: 700 !important;
-  font-size: 0.75rem !important;
+.status-pill {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-top: 0.25rem;
 }
 
-/* Colores dinámicos según disponibilidad */
-.border-green-500, .bg-green-100 {
-  background-color: rgba(16, 185, 129, 0.15) !important;
-  color: #34d399 !important;
-  border: 1px solid #059669 !important;
+.status-pill.free {
+  background: rgba(34, 197, 94, 0.2);
+  color: #4ade80;
+  border: 1px solid rgba(34, 197, 94, 0.4);
 }
 
-.border-red-500, .bg-red-100 {
-  background-color: rgba(239, 68, 68, 0.15) !important;
-  color: #f87171 !important;
-  border: 1px solid #dc2626 !important;
+.status-pill.busy {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.4);
 }
 
-/* Textos dentro de la tarjeta */
-p {
+.room-type {
   color: #94a3b8;
-  margin-bottom: 0.4rem;
-  font-size: 0.95rem;
-}
-
-p span, p strong {
-  color: #f1f5f9;
   font-weight: 600;
+  margin: 0 0 1rem 0;
 }
 
-/* Precio en la tarjeta */
-.text-indigo-600, p:last-child {
-  color: #818cf8 !important;
-  font-size: 1.35rem !important;
-  font-weight: 800 !important;
-  margin-top: 0.75rem;
+.room-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  color: #cbd5e1;
+  font-size: 0.9rem;
+  margin-bottom: 1.25rem;
+}
+
+.room-footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 0.75rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.3rem;
+}
+
+.price {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #818cf8;
+}
+
+.room-footer small {
+  color: #94a3b8;
 }

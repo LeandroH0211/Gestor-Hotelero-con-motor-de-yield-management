@@ -11,8 +11,11 @@
         <router-link to="/" class="nav-btn">
           Cuartelería
         </router-link>
-        <router-link to="/reservas" class="nav-btn btn-primary">
+        <router-link to="/reservas" class="nav-btn">
           Hacer Reserva
+        </router-link>
+        <router-link to="/admin" class="nav-btn">
+          Admin
         </router-link>
       </div>
     </div>

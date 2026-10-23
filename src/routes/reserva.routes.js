@@ -1,5 +1,6 @@
 const { Router } = require('express');
 const ReservaController = require('../controllers/reserva.controller');
+const { verificarToken, verificarRol } = require('../middlewares/authMiddleware');
 
 const router = Router();
 
@@ -43,7 +44,22 @@ const router = Router();
  *           example: 80.00
  */
 
-router.get('/', ReservaController.getAll);
-router.post('/', ReservaController.create);
+/**
+ * @swagger
+ * /api/reservas:
+ *   get:
+ *     summary: Obtener todas las reservas (Solo Admin y Recepcionista)
+ *     tags: [Reservas]
+ */
+router.get('/', verificarToken, verificarRol(['admin', 'recepcionista']), ReservaController.getAll);
+
+/**
+ * @swagger
+ * /api/reservas:
+ *   post:
+ *     summary: Crear una nueva reserva con Yield Management
+ *     tags: [Reservas]
+ */
+router.post('/', verificarToken, verificarRol(['admin', 'recepcionista', 'cliente']), ReservaController.create);
 
 module.exports = router;

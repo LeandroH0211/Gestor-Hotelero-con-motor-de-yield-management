@@ -60,6 +60,7 @@ router.get('/', verificarToken, verificarRol(['admin', 'recepcionista']), Reserv
  *     summary: Crear una nueva reserva con Yield Management
  *     tags: [Reservas]
  */
-router.post('/', verificarToken, verificarRol(['admin', 'recepcionista', 'cliente']), ReservaController.create);
+// Quitamos temporalmente los middlewares de autenticación para permitir reservas manuales libres
+router.post('/', ReservaController.create);
 
 module.exports = router;

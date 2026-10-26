@@ -2,6 +2,26 @@ const pool = require('./db');
 
 const schema = [
     {
+        table: 'usuarios',
+        create: `
+            CREATE TABLE IF NOT EXISTS usuarios (
+                id SERIAL PRIMARY KEY,
+                nombre VARCHAR(100) NOT NULL,
+                email VARCHAR(100) UNIQUE NOT NULL,
+                password VARCHAR(255) NOT NULL,
+                rol VARCHAR(50) DEFAULT 'cliente',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `,
+        columns: [
+            { name: 'nombre', def: 'VARCHAR(100) NOT NULL' },
+            { name: 'email', def: 'VARCHAR(100) UNIQUE NOT NULL' },
+            { name: 'password', def: 'VARCHAR(255) NOT NULL' },
+            { name: 'rol', def: "VARCHAR(50) DEFAULT 'cliente'" },
+            { name: 'created_at', def: 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP' }
+        ]
+    },
+    {
         table: 'tipos_habitacion',
         create: `
             CREATE TABLE IF NOT EXISTS tipos_habitacion (
@@ -98,6 +118,16 @@ async function runMigrations() {
             }
         }
         console.log(`Tabla lista: ${entry.table}`);
+    }
+
+    // Insertar un usuario administrador por defecto si la tabla está vacía
+    const checkUsuarios = await pool.query('SELECT COUNT(*) FROM usuarios');
+    if (parseInt(checkUsuarios.rows[0].count) === 0) { 
+        await pool.query(`
+            INSERT INTO usuarios (nombre, email, password, rol) VALUES 
+            ('Administrador', 'admin@hotel.com', '123456', 'admin');
+        `);
+        console.log('Usuario administrador por defecto creado.');
     }
 
     // Insertar datos iniciales si están vacías las tablas principales

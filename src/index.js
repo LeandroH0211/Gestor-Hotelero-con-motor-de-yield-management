@@ -1,14 +1,15 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const cookieParser = require('cookie-parser'); // <-- Nuevo para leer cookies seguras
-const rateLimit = require('express-rate-limit'); // <-- Nuevo contra ataques de fuerza bruta
+const cookieParser = require('cookie-parser'); 
+const rateLimit = require('express-rate-limit'); 
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./config/swagger');
 const runMigrations = require('./config/migrate');
 
 const habitacionRoutes = require('./routes/habitacion.routes');
 const reservaRoutes = require('./routes/reserva.routes');
+const authRoutes = require('./routes/auth.routes'); //IMPORTA LAS RUTAS DE AUTH
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -35,6 +36,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 // Rutas principales MVC
 app.use('/api/habitaciones', habitacionRoutes);
 app.use('/api/reservas', reservaRoutes);
+app.use('/api/auth', authRoutes); // <--- 2. REGISTRA EL ENDPOINT BASE PARA AUTH
 
 app.get('/', (req, res) => {
     res.json({ message: 'API Gestor Hotelero con Yield Management operando correctamente', docs: '/api-docs' });

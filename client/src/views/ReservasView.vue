@@ -88,7 +88,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import api from '../services/api';
 
 export default {
   data() {
@@ -109,7 +109,7 @@ export default {
   methods: {
     async cargarHabitacionesDisponibles() {
       try {
-        const res = await axios.get('http://localhost:3000/api/habitaciones');
+        const res = await api.get('http://localhost:3000/api/habitaciones');
         this.habitaciones = res.data.data.filter(h => h.estado === 'Disponible');
       } catch (error) {
         console.error('Error al cargar habitaciones:', error);
@@ -123,7 +123,7 @@ export default {
     },
     async registrarReserva() {
       try {
-        const res = await axios.post('http://localhost:3000/api/reservas', this.form);
+        const res = await api.post('http://localhost:3000/api/reservas', this.form);
         this.resultado = res.data;
         alert('¡Reserva creada correctamente!');
         this.cargarHabitacionesDisponibles();

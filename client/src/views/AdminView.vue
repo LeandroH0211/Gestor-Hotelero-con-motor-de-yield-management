@@ -22,14 +22,37 @@
 </template>
 
 <script>
+import api from '../services/api';
+
 export default {
   name: 'AdminView',
   methods: {
-    modificarPrecios() {
-      alert('Conectado con la ruta PUT de precios (Admin)');
+    async modificarPrecios() {
+      try {
+        // Conexión con la API para listar o actualizar reglas de Yield Management
+        const response = await api.get('/habitaciones'); 
+        alert('Conexión exitosa con el sistema de tarifas y habitaciones.');
+        console.log('Datos obtenidos:', response.data);
+      } catch (error) {
+        const mensaje = error.response?.data?.error || error.response?.data?.message || 'No tienes permisos de administrador o la sesión expiró.';
+        alert('Error de acceso: ' + mensaje);
+      }
     },
-    gestionarHabitaciones() {
-      alert('Conectado con la ruta PUT de estado de habitaciones');
+
+    async gestionarHabitaciones() {
+      try {
+        // Ejemplo conectando con la ruta PUT protegida por rol admin en el backend
+        // Cambia el ID (ej: 1) por el de la habitación que desees gestionar
+        const response = await api.put('/habitaciones/1/estado', {
+          estado: 'Ocupada'
+        });
+        
+        alert('¡Estado de la cuartelería actualizado con éxito!');
+        console.log('Respuesta del servidor:', response.data);
+      } catch (error) {
+        const mensaje = error.response?.data?.error || error.response?.data?.message || 'No autorizado para cambiar el estado de las habitaciones.';
+        alert('Acceso denegado: ' + mensaje);
+      }
     }
   }
 };

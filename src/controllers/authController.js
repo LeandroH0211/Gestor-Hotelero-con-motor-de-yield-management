@@ -1,3 +1,4 @@
+const pool = require('../config/db'); // <--- Importante para conectar con la BD
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
@@ -18,13 +19,25 @@ const login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
+    // 1. Buscar el usuario real en la base de datos PostgreSQL
+    const result = await pool.query('SELECT * FROM usuarios WHERE email = $1', [email]);
 
-    const usuarioSimulado = { id: 1, email, rol: 'admin' };
+    if (result.rows.length === 0) {
+      return res.status(401).json({ error: 'Correo o contraseña incorrectos' });
+    }
 
+    const usuario = result.rows[0];
 
-    const accessToken = generarAccessToken(usuarioSimulado);
-    const refreshToken = generarRefreshToken(usuarioSimulado);
+    // 2. Validar la contraseña 
+    const passwordValida = password === usuario.password;
 
+    if (!passwordValida) {
+      return res.status(401).json({ error: 'Correo o contraseña incorrectos' });
+    }
+
+    // 3. Generar los tokens con los datos reales del usuario
+    const accessToken = generarAccessToken(usuario);
+    const refreshToken = generarRefreshToken(usuario);
 
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
@@ -33,15 +46,14 @@ const login = async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000 // 7 días
     });
 
-
     return res.json({
       message: 'Inicio de sesión exitoso',
       accessToken,
-      usuario: { id: usuarioSimulado.id, email: usuarioSimulado.email, rol: usuarioSimulado.rol }
+      usuario: { id: usuario.id, email: usuario.email, rol: usuario.rol }
     });
 
   } catch (error) {
-    console.error(error);
+    console.error('Error en el login:', error);
     return res.status(500).json({ error: 'Error interno del servidor' });
   }
 };

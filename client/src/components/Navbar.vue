@@ -17,6 +17,10 @@
         <router-link to="/admin" class="nav-btn">
           Admin
         </router-link>
+        <!-- Enlace de inicio de sesión añadido -->
+        <router-link to="/login" class="nav-btn">
+          Iniciar Sesión
+        </router-link>
       </div>
     </div>
   </nav>
@@ -68,6 +72,8 @@ export default { name: 'Navbar' };
   display: flex;
   align-items: center;
   gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 /* Estilo elegante para los botones de la barra de navegación */

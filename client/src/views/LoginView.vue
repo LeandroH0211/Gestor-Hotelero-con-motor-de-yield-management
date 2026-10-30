@@ -1,7 +1,10 @@
 <template>
   <div class="login-container">
     <div class="login-card">
-      <h2>Iniciar Sesión</h2>
+      <div class="login-header">
+        <h2>Iniciar Sesión</h2>
+        <span class="badge-secure">Seguro</span>
+      </div>
       <p class="subtitle">Gestor Hotelero - Acceso al Sistema</p>
 
       <form @submit.prevent="handleLogin">
@@ -54,7 +57,6 @@ export default {
       this.errorMessage = '';
 
       try {
-        // Petición al backend que valida las credenciales y configura la cookie HttpOnly
         const response = await api.post('/auth/login', {
           email: this.email,
           password: this.password
@@ -63,7 +65,6 @@ export default {
         localStorage.setItem('token', response.data.accessToken);
         localStorage.setItem('userRole', response.data.usuario.rol);
         
-        // Redirigir al usuario al Dashboard principal tras un login exitoso
         this.$router.push({ name: 'Dashboard' });
 
       } catch (error) {
@@ -81,32 +82,64 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 80vh;
-  padding: 1rem;
+  min-height: 75vh;
+  padding: 1.5rem;
 }
 
 .login-card {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
+  background: linear-gradient(145deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.92) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 2.5rem;
-  border-radius: 16px;
+  padding: 2.75rem;
+  border-radius: 24px;
   width: 100%;
-  max-width: 400px;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  max-width: 440px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
   color: #fff;
+  animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.login-card h2 {
-  margin-bottom: 0.5rem;
-  color: #f6ad55;
-  text-align: center;
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.login-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.25rem;
+}
+
+.login-header h2 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 1.75rem;
+  font-weight: 800;
+}
+
+.badge-secure {
+  font-size: 0.75rem;
+  background: rgba(99, 102, 241, 0.2);
+  border: 1px solid rgba(99, 102, 241, 0.4);
+  color: #a5b4fc;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
 }
 
 .subtitle {
-  color: #a0aec0;
+  color: #94a3b8;
   font-size: 0.9rem;
-  text-align: center;
+  text-align: left;
   margin-bottom: 2rem;
 }
 
@@ -118,51 +151,62 @@ export default {
   display: block;
   margin-bottom: 0.5rem;
   font-size: 0.85rem;
-  color: #cbd5e0;
+  font-weight: 600;
+  color: #cbd5e1;
 }
 
 .form-group input {
   width: 100%;
-  padding: 0.75rem;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: rgba(0, 0, 0, 0.2);
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(15, 23, 42, 0.8);
   color: #fff;
-  font-size: 1rem;
+  font-size: 0.95rem;
   outline: none;
-  transition: border-color 0.2s;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
 }
 
 .form-group input:focus {
-  border-color: #667eea;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.25);
+  background: rgba(15, 23, 42, 0.95);
 }
 
 .error-msg {
-  color: #fc8181;
+  color: #f87171;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  padding: 0.6rem;
+  border-radius: 8px;
   font-size: 0.85rem;
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
   text-align: center;
 }
 
 .btn-login {
   width: 100%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
   color: white;
   border: none;
-  padding: 0.75rem;
-  border-radius: 8px;
+  padding: 0.95rem;
+  border-radius: 12px;
   cursor: pointer;
-  font-weight: bold;
+  font-weight: 700;
   font-size: 1rem;
-  transition: opacity 0.2s;
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.35);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn-login:hover:not(:disabled) {
-  opacity: 0.9;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(99, 102, 241, 0.55);
 }
 
 .btn-login:disabled {
-  opacity: 0.5;
+  opacity: 0.6;
   cursor: not-allowed;
+  transform: none;
 }
 </style>

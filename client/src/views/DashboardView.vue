@@ -80,9 +80,10 @@
 </template>
 
 <script>
-import axios from 'axios';
+import api from '../services/api';
 
 export default {
+  name: 'DashboardView',
   data() {
     return {
       habitaciones: [],
@@ -92,7 +93,7 @@ export default {
   methods: {
     async cargarHabitaciones() {
       try {
-        const res = await axios.get('http://localhost:3000/api/habitaciones');
+        const res = await api.get('/habitaciones');
         this.habitaciones = res.data.data;
         this.porcentajeOcupacion = res.data.ocupacion_actual || this.calcularOcupacion();
       } catch (error) {
@@ -112,12 +113,24 @@ export default {
 </script>
 
 <style scoped>
-/* Contenedor principal */
+/* Contenedor principal con animación de entrada */
 .dashboard-wrapper {
   width: 100%;
   display: flex;
   justify-content: center;
   padding: 2.5rem 1rem;
+  animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .dashboard-container {
@@ -144,12 +157,13 @@ export default {
   width: 100%;
   max-width: 360px;
   margin-bottom: 3rem;
-  background: rgba(30, 41, 59, 0.75);
-  backdrop-filter: blur(16px);
+  background: linear-gradient(145deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.92) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   padding: 2rem;
   border-radius: 24px;
-  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -175,7 +189,7 @@ export default {
   color: #ffffff;
   margin: 0.4rem 0;
   line-height: 1;
-  text-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
+  text-shadow: 0 2px 12px rgba(99, 102, 241, 0.5);
 }
 
 .stats-footer {
@@ -194,24 +208,24 @@ export default {
 
 /* Tarjeta individual detallada */
 .hab-card {
-  background: rgba(30, 41, 59, 0.75);
-  backdrop-filter: blur(16px);
-  border-radius: 22px;
+  background: linear-gradient(145deg, rgba(30, 41, 59, 0.75) 0%, rgba(15, 23, 42, 0.88) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 24px;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.4);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   text-align: left;
-  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .hab-card:hover {
   transform: translateY(-8px) scale(1.02);
-  box-shadow: 0 25px 45px -12px rgba(99, 102, 241, 0.35);
+  box-shadow: 0 25px 50px -12px rgba(99, 102, 241, 0.35);
   border-color: rgba(99, 102, 241, 0.5);
-  background: rgba(30, 41, 59, 0.88);
 }
 
 /* Encabezado de la tarjeta */
@@ -288,7 +302,7 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 0.85rem;
-  background: rgba(15, 23, 42, 0.4);
+  background: rgba(15, 23, 42, 0.5);
   padding: 1rem;
   border-radius: 14px;
   border: 1px solid rgba(255, 255, 255, 0.05);
@@ -325,7 +339,7 @@ export default {
 /* Pie de tarjeta (Precio) */
 .hab-footer {
   padding: 1.25rem 1.5rem;
-  background: rgba(15, 23, 42, 0.3);
+  background: rgba(15, 23, 42, 0.4);
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   align-items: center;
@@ -347,7 +361,9 @@ export default {
 .price-amount {
   font-size: 1.7rem;
   font-weight: 800;
-  color: #ffffff;
+  background: linear-gradient(135deg, #818cf8 0%, #c7d2fe 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
   letter-spacing: -0.5px;
 }
 

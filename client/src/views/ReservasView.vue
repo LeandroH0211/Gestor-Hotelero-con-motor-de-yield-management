@@ -91,6 +91,7 @@
 import api from '../services/api';
 
 export default {
+  name: 'ReservasView',
   data() {
     return {
       habitaciones: [],
@@ -109,7 +110,7 @@ export default {
   methods: {
     async cargarHabitacionesDisponibles() {
       try {
-        const res = await api.get('http://localhost:3000/api/habitaciones');
+        const res = await api.get('/habitaciones');
         this.habitaciones = res.data.data.filter(h => h.estado === 'Disponible');
       } catch (error) {
         console.error('Error al cargar habitaciones:', error);
@@ -123,7 +124,7 @@ export default {
     },
     async registrarReserva() {
       try {
-        const res = await api.post('http://localhost:3000/api/reservas', this.form);
+        const res = await api.post('/reservas', this.form);
         this.resultado = res.data;
         alert('¡Reserva creada correctamente!');
         this.cargarHabitacionesDisponibles();
@@ -148,20 +149,27 @@ export default {
 }
 
 .form-card {
-  background: rgba(30, 41, 59, 0.85);
-  backdrop-filter: blur(16px);
+  background: linear-gradient(145deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.92) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  padding: 2.5rem;
+  border-radius: 24px;
+  padding: 2.75rem;
   width: 100%;
   max-width: 580px;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-  animation: fadeIn 0.4s ease-out;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+  animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .form-header {
@@ -173,19 +181,20 @@ export default {
 
 .form-header h2 {
   margin: 0;
-  font-size: 1.6rem;
+  font-size: 1.75rem;
   color: #ffffff;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .badge-yield {
   font-size: 0.75rem;
-  background: rgba(99, 102, 241, 0.25);
-  border: 1px solid #6366f1;
+  background: rgba(99, 102, 241, 0.2);
+  border: 1px solid rgba(99, 102, 241, 0.4);
   color: #a5b4fc;
   padding: 0.25rem 0.75rem;
   border-radius: 9999px;
   font-weight: 600;
+  letter-spacing: 0.5px;
 }
 
 .subtitle {
@@ -211,7 +220,7 @@ export default {
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 0.5rem;
 }
 
 .form-group label {
@@ -221,19 +230,20 @@ export default {
 }
 
 input, select {
-  background: rgba(15, 23, 42, 0.75);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   color: #f8fafc;
-  padding: 0.75rem 1rem;
-  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
   font-size: 0.95rem;
   outline: none;
-  transition: all 0.25s ease;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
 }
 
 input:focus, select:focus {
   border-color: #6366f1;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.25);
   background: rgba(15, 23, 42, 0.95);
 }
 
@@ -243,33 +253,34 @@ select option {
 }
 
 .btn-submit {
-  margin-top: 0.75rem;
+  margin-top: 1rem;
   background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
   color: #ffffff;
   border: none;
-  padding: 0.9rem;
-  border-radius: 10px;
+  padding: 0.95rem;
+  border-radius: 12px;
   font-weight: 700;
   font-size: 1rem;
   cursor: pointer;
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.35);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
 }
 
 .btn-submit:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.5);
+  box-shadow: 0 8px 25px rgba(99, 102, 241, 0.55);
 }
 
 .result-box {
-  margin-top: 1.5rem;
+  margin-top: 1.75rem;
   padding: 1.25rem;
-  background: rgba(34, 197, 94, 0.15);
-  border: 1px solid rgba(34, 197, 94, 0.4);
-  border-radius: 12px;
+  background: rgba(34, 197, 94, 0.12);
+  border: 1px solid rgba(34, 197, 94, 0.35);
+  border-radius: 16px;
   color: #4ade80;
   text-align: left;
   backdrop-filter: blur(10px);
+  box-shadow: 0 10px 25px -5px rgba(34, 197, 94, 0.1);
 }
 
 .result-box h3 {
@@ -280,15 +291,16 @@ select option {
 }
 
 .result-box p {
-  margin: 0.2rem 0;
+  margin: 0.25rem 0;
   font-size: 0.9rem;
   color: #cbd5e1;
 }
 
 .final-price {
-  font-size: 1.2rem;
+  font-size: 1.25rem;
   font-weight: 800;
   margin-top: 0.5rem !important;
   color: #4ade80 !important;
+  text-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
 }
 </style>

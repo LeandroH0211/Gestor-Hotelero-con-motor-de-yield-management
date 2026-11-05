@@ -1,6 +1,7 @@
 const { Router } = require('express');
 const ReservaController = require('../controllers/reserva.controller');
 const { verificarToken, verificarRol } = require('../middlewares/authMiddleware');
+const { validate, reservaSchema } = require('../middlewares/validate.middleware'); 
 
 const router = Router();
 
@@ -60,6 +61,13 @@ router.get('/', verificarToken, verificarRol(['admin', 'recepcionista']), Reserv
  *     summary: Crear una nueva reserva con Yield Management
  *     tags: [Reservas]
  */
-router.post('/', verificarToken, verificarRol(['admin', 'recepcionista', 'cliente']), ReservaController.create);
+//validate(reservaSchema) antes de que llegue al controlador
+router.post(
+  '/', 
+  verificarToken, 
+  verificarRol(['admin', 'recepcionista', 'cliente']), 
+  validate(reservaSchema), 
+  ReservaController.create
+);
 
 module.exports = router;

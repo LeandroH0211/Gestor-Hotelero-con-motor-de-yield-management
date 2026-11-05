@@ -40,6 +40,7 @@
 
 <script>
 import api from '../services/api';
+import authMemory from '../services/authMemory'; // <--- 1. Importar el gestor en memoria
 
 export default {
   name: 'LoginView',
@@ -62,8 +63,9 @@ export default {
           password: this.password
         });
 
-        localStorage.setItem('token', response.data.accessToken);
-        localStorage.setItem('userRole', response.data.usuario.rol);
+        // 2. Guardar el token en memoria viva (authMemory) en lugar de localStorage[cite: 1, 10]
+        authMemory.setToken(response.data.accessToken);
+        localStorage.setItem('userRole', response.data.usuario.rol); // El rol de UI se mantiene en localStorage
         
         this.$router.push({ name: 'Dashboard' });
 

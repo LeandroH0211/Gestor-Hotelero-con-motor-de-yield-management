@@ -1,4 +1,5 @@
 const pool = require('./db');
+const bcrypt = require('bcrypt'); //Importar bcrypt para hashear la contraseña por defecto
 
 const schema = [
     {
@@ -120,19 +121,20 @@ async function runMigrations() {
         console.log(`Tabla lista: ${entry.table}`);
     }
 
-    // Insertar un usuario administrador por defecto si la tabla está vacía
+    // Insertar un usuario administrador por defecto si la tabla está vacía (con contraseña hasheada)
     const checkUsuarios = await pool.query('SELECT COUNT(*) FROM usuarios');
     if (parseInt(checkUsuarios.rows[0].count) === 0) { 
+        const hashedPassword = await bcrypt.hash('123456', 10); //Hasheo seguro con bcrypt
         await pool.query(`
             INSERT INTO usuarios (nombre, email, password, rol) VALUES 
-            ('Administrador', 'admin@hotel.com', '123456', 'admin');
-        `);
-        console.log('Usuario administrador por defecto creado.');
+            ($1, $2, $3, $4);
+        `, ['Administrador', 'admin@hotel.com', hashedPassword, 'admin']);
+        console.log('Usuario administrador por defecto creado con contraseña cifrada.');
     }
 
     // Insertar datos iniciales si están vacías las tablas principales
-    const checkTipos = await pool.query('SELECT COUNT(*) FROM tipos_habitacion');
-    if (parseInt(checkTipos.rows[0].count) === 0) {
+const checkTipos = await pool.query('SELECT COUNT(*) FROM tipos_habitacion');
+    if (parseInt(checkTipos.rows[0].count) === 0) { 
         await pool.query(`
             INSERT INTO tipos_habitacion (nombre, precio_base, capacidad) VALUES 
             ('Estándar Individual', 80.00, 1),

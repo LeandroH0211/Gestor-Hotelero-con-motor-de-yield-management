@@ -1,4 +1,4 @@
-const pool = require('../config/db'); // <--- Importante para conectar con la BD
+const pool = require('../config/db'); 
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
@@ -28,8 +28,8 @@ const login = async (req, res) => {
 
     const usuario = result.rows[0];
 
-    // 2. Validar la contraseña 
-    const passwordValida = password === usuario.password;
+    // 2. Validar la contraseña usando bcrypt.compare (Estándar de seguridad avanzado)
+    const passwordValida = await bcrypt.compare(password, usuario.password);
 
     if (!passwordValida) {
       return res.status(401).json({ error: 'Correo o contraseña incorrectos' });

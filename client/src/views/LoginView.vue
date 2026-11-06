@@ -40,7 +40,7 @@
 
 <script>
 import api from '../services/api';
-import authMemory from '../services/authMemory'; // <--- 1. Importar el gestor en memoria
+import authMemory from '../services/authMemory';
 
 export default {
   name: 'LoginView',
@@ -63,14 +63,16 @@ export default {
           password: this.password
         });
 
-        // 2. Guardar el token en memoria viva (authMemory) en lugar de localStorage[cite: 1, 10]
+        // 1. Almacenar el token en memoria y el rol en localStorage (también guardamos token en localStorage para persisiticía del Navbar)
         authMemory.setToken(response.data.accessToken);
-        localStorage.setItem('userRole', response.data.usuario.rol); // El rol de UI se mantiene en localStorage
-        
-        this.$router.push({ name: 'Dashboard' });
+        localStorage.setItem('token', response.data.accessToken);
+        localStorage.setItem('userRole', response.data.usuario?.rol || 'admin');
+
+        // 2. Redirigir directamente al path principal ('/')
+        await this.$router.push('/');
 
       } catch (error) {
-        this.errorMessage = error.response?.data?.error || 'Error al iniciar sesión. Verifica tus credenciales.';
+        this.errorMessage = error.response?.data?.error || error.response?.data?.message || 'Error al iniciar sesión. Verifica tus credenciales.';
       } finally {
         this.loading = false;
       }

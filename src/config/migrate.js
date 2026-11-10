@@ -1,5 +1,5 @@
 const pool = require('./db');
-const bcrypt = require('bcrypt'); //Importar bcrypt para hashear la contraseña por defecto
+const bcrypt = require('bcrypt'); // Importar bcrypt para hashear la contraseña por defecto
 
 const schema = [
     {
@@ -11,6 +11,7 @@ const schema = [
                 email VARCHAR(100) UNIQUE NOT NULL,
                 password VARCHAR(255) NOT NULL,
                 rol VARCHAR(50) DEFAULT 'cliente',
+                refresh_token TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         `,
@@ -19,6 +20,7 @@ const schema = [
             { name: 'email', def: 'VARCHAR(100) UNIQUE NOT NULL' },
             { name: 'password', def: 'VARCHAR(255) NOT NULL' },
             { name: 'rol', def: "VARCHAR(50) DEFAULT 'cliente'" },
+            { name: 'refresh_token', def: 'TEXT' },
             { name: 'created_at', def: 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP' }
         ]
     },
@@ -81,6 +83,7 @@ const schema = [
                 id SERIAL PRIMARY KEY,
                 cliente_nombre VARCHAR(100) NOT NULL,
                 cliente_email VARCHAR(100) NOT NULL,
+                usuario_id INT REFERENCES usuarios(id) ON DELETE CASCADE,
                 habitacion_id INT REFERENCES habitaciones(id),
                 fecha_checkin DATE NOT NULL,
                 fecha_checkout DATE NOT NULL,
@@ -92,6 +95,7 @@ const schema = [
         columns: [
             { name: 'cliente_nombre', def: 'VARCHAR(100) NOT NULL' },
             { name: 'cliente_email', def: 'VARCHAR(100) NOT NULL' },
+            { name: 'usuario_id', def: 'INT REFERENCES usuarios(id) ON DELETE CASCADE' },
             { name: 'habitacion_id', def: 'INT REFERENCES habitaciones(id)' },
             { name: 'fecha_checkin', def: 'DATE NOT NULL' },
             { name: 'fecha_checkout', def: 'DATE NOT NULL' },
@@ -124,7 +128,7 @@ async function runMigrations() {
     // Insertar un usuario administrador por defecto si la tabla está vacía (con contraseña hasheada)
     const checkUsuarios = await pool.query('SELECT COUNT(*) FROM usuarios');
     if (parseInt(checkUsuarios.rows[0].count) === 0) { 
-        const hashedPassword = await bcrypt.hash('123456', 10); //Hasheo seguro con bcrypt
+        const hashedPassword = await bcrypt.hash('123456', 10); // Hasheo seguro con bcrypt
         await pool.query(`
             INSERT INTO usuarios (nombre, email, password, rol) VALUES 
             ($1, $2, $3, $4);
@@ -133,7 +137,7 @@ async function runMigrations() {
     }
 
     // Insertar datos iniciales si están vacías las tablas principales
-const checkTipos = await pool.query('SELECT COUNT(*) FROM tipos_habitacion');
+    const checkTipos = await pool.query('SELECT COUNT(*) FROM tipos_habitacion');
     if (parseInt(checkTipos.rows[0].count) === 0) { 
         await pool.query(`
             INSERT INTO tipos_habitacion (nombre, precio_base, capacidad) VALUES 

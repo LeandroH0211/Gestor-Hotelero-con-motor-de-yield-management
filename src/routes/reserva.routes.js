@@ -2,6 +2,7 @@ const { Router } = require('express');
 const ReservaController = require('../controllers/reserva.controller');
 const { verificarToken, verificarRol } = require('../middlewares/authMiddleware');
 const { validate, reservaSchema } = require('../middlewares/validate.middleware'); 
+const { verificarPropietarioReserva } = require('../middlewares/ownershipMiddleware'); //Importar el middleware de propiedad
 
 const router = Router();
 
@@ -61,7 +62,6 @@ router.get('/', verificarToken, verificarRol(['admin', 'recepcionista']), Reserv
  *     summary: Crear una nueva reserva con Yield Management
  *     tags: [Reservas]
  */
-//validate(reservaSchema) antes de que llegue al controlador
 router.post(
   '/', 
   verificarToken, 
@@ -69,5 +69,23 @@ router.post(
   validate(reservaSchema), 
   ReservaController.create
 );
+
+/**
+ * @swagger
+ * /api/reservas/{id}:
+ *   get:
+ *     summary: Obtener una reserva por ID aplicando Resource Ownership
+ *     tags: [Reservas]
+ */
+router.get('/:id', verificarToken, verificarPropietarioReserva, ReservaController.getById); // Aplicar middleware de propiedad
+
+/**
+ * @swagger
+ * /api/reservas/{id}:
+ *   delete:
+ *     summary: Eliminar una reserva por ID aplicando Resource Ownership
+ *     tags: [Reservas]
+ */
+router.delete('/:id', verificarToken, verificarPropietarioReserva, ReservaController.delete); //Aplicar middleware de propiedad
 
 module.exports = router;

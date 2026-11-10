@@ -28,16 +28,19 @@ const login = async (req, res) => {
 
     const usuario = result.rows[0];
 
-    // 2. Validar la contraseña usando bcrypt.compare (Estándar de seguridad avanzado)
+    // 2. Validar la contraseña usando bcrypt.compare
     const passwordValida = await bcrypt.compare(password, usuario.password);
 
     if (!passwordValida) {
       return res.status(401).json({ error: 'Correo o contraseña incorrectos' });
     }
 
-    // 3. Generar los tokens con los datos reales del usuario
+    // 3. Generar los tokens
     const accessToken = generarAccessToken(usuario);
     const refreshToken = generarRefreshToken(usuario);
+
+    // Guardar el Refresh Token en la BD (esto revoca sesiones concurrentes anteriores)
+    await pool.query('UPDATE usuarios SET refresh_token = $1 WHERE id = $2', [refreshToken, usuario.id]);
 
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
@@ -58,4 +61,47 @@ const login = async (req, res) => {
   }
 };
 
-module.exports = { login };
+// 4. Endpoint para manejar la rotación y revocación del Refresh Token
+const refreshTokenEndpoint = async (req, res) => {
+  const cookies = req.cookies;
+  if (!cookies?.refreshToken) return res.sendStatus(401);
+
+  const incomingRefreshToken = cookies.refreshToken;
+
+  try {
+    // Verificar si el refresh token coincide con el registrado en la base de datos
+    const result = await pool.query('SELECT * FROM usuarios WHERE refresh_token = $1', [incomingRefreshToken]);
+    
+    if (result.rows.length === 0) {
+      // Posible robo de token o reutilización detectada: Revocar seguridad
+      return res.status(403).json({ error: 'Token de refresco inválido o ya utilizado (Sesión revocada)' });
+    }
+
+    const usuario = result.rows[0];
+
+    jwt.verify(incomingRefreshToken, SECRET_REFRESH_TOKEN, async (err, decoded) => {
+      if (err || usuario.id !== decoded.id) return res.sendStatus(403);
+
+      // Rotación: Generar nuevos tokens
+      const newAccessToken = generarAccessToken(usuario);
+      const newRefreshToken = generarRefreshToken(usuario);
+
+      // Actualizar el nuevo Refresh Token en la base de datos
+      await pool.query('UPDATE usuarios SET refresh_token = $1 WHERE id = $2', [newRefreshToken, usuario.id]);
+
+      res.cookie('refreshToken', newRefreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 7 * 24 * 60 * 60 * 1000
+      });
+
+      return res.json({ accessToken: newAccessToken });
+    });
+  } catch (error) {
+    console.error('Error en refreshToken:', error);
+    return res.sendStatus(500);
+  }
+};
+
+module.exports = { login, refreshTokenEndpoint };

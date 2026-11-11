@@ -3,9 +3,8 @@ const HabitacionModel = require('../models/habitacion.model');
 const pool = require('../config/db');
 
 const ReservaController = {
-    async getAll(req, res) {
+    async getAll(req, res, next) {
         try {
-            // Opcional: Si quieres que un cliente normal solo vea sus propias reservas y el admin vea todas
             const usuario = req.user;
             let query = 'SELECT * FROM reservas';
             let params = [];
@@ -18,12 +17,12 @@ const ReservaController = {
             const result = await pool.query(query, params);
             res.json({ success: true, data: result.rows });
         } catch (err) {
-            res.status(500).json({ success: false, message: err.message });
+            next(err); // Delega el error al middleware global
         }
     },
 
-    // 🛡️ Obtener por ID con validación de Resource Ownership
-    async getById(req, res) {
+    // Obtener por ID con validación de Resource Ownership
+    async getById(req, res, next) {
         try {
             const { id } = req.params;
             const usuarioAutenticado = req.user; // Viene del token
@@ -49,19 +48,29 @@ const ReservaController = {
 
             res.json({ success: true, data: reserva });
         } catch (err) {
-            res.status(500).json({ success: false, message: err.message });
+            next(err); // Delega el error al middleware global
         }
     },
 
-    async create(req, res) {
+    async create(req, res, next) {
         try {
             const { cliente_nombre, cliente_email, habitacion_id, fecha_checkin, fecha_checkout, anticipacion_dias, precio_base } = req.body;
             
             // Capturar el ID del usuario autenticado (viene del token gracias a verificarToken)
             const usuario_id = req.user ? req.user.id : null; 
             
-            if (!cliente_nombre || !cliente_email || !habitacion_id || precio_base === undefined || anticipacion_dias === undefined) {
-                return res.status(400).json({ success: false, message: 'Faltan datos obligatorios para la reserva' });
+            if (!cliente_nombre || !cliente_email || !habitacion_id || precio_base === undefined || anticipacion_dias === undefined || !fecha_checkin || !fecha_checkout) {
+                return res.status(400).json({ success: false, message: 'Faltan datos obligatorios para la reserva (incluyendo fechas)' });
+            }
+
+            // Calcular el número de noches entre el check-in y el check-out
+            const checkinDate = new Date(fecha_checkin);
+            const checkoutDate = new Date(fecha_checkout);
+            const diferenciaMilisegundos = checkoutDate - checkinDate;
+            const numeroNoches = Math.ceil(diferenciaMilisegundos / (1000 * 60 * 60 * 24));
+
+            if (numeroNoches <= 0) {
+                return res.status(400).json({ success: false, message: 'La fecha de check-out debe ser posterior a la fecha de check-in' });
             }
 
             // Control estricto de sobreventa / Ocupación al 100%
@@ -70,35 +79,48 @@ const ReservaController = {
                 return res.status(400).json({ success: false, message: 'Control de sobreventa estricto: El hotel se encuentra al 100% de ocupación.' });
             }
 
-            // Motor de Yield Management (Cálculo de tarifa dinámica algorítmica)
+            // Motor de Yield Management (Tarifa por noche ajustada dinámicamente)
             const multiplicador = await ReservaModel.obtenerReglaYield(ocupacionActual, anticipacion_dias);
-            const precio_aplicado = parseFloat(precio_base) * multiplicador;
+            const precioPorNoche = parseFloat(precio_base) * multiplicador;
 
-            // Crear la reserva vinculando el usuario_id para el control de propiedad
+            // Calcular el precio total de la estancia multiplicando por el número de noches
+            const precioTotalAplicado = precioPorNoche * numeroNoches;
+
+            // Crear la reserva vinculando el usuario_id y el precio total calculado
             const nuevaReservaQuery = await pool.query(
                 `INSERT INTO reservas (cliente_nombre, cliente_email, usuario_id, habitacion_id, fecha_checkin, fecha_checkout, anticipacion_dias, precio_aplicado) 
                  VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
-                [cliente_nombre, cliente_email, usuario_id, habitacion_id, fecha_checkin, fecha_checkout, anticipacion_dias, precio_aplicado]
+                [cliente_nombre, cliente_email, usuario_id, habitacion_id, fecha_checkin, fecha_checkout, anticipacion_dias, precioTotalAplicado]
             );
+
+            // Sincronización: Marcar la habitación como 'Ocupada'
+            await HabitacionModel.actualizarEstado(habitacion_id, 'Ocupada');
 
             res.status(201).json({ 
                 success: true, 
                 message: 'Reserva creada aplicando Yield Management con éxito', 
-                multiplicador_yield: multiplicador,
+                multiplicador: multiplicador,             
+                multiplicador_yield: multiplicador,     
+                detalles_cobro: {
+                    precio_por_noche: precioPorNoche.toFixed(2),
+                    noches: numeroNoches,
+                    multiplicador_yield: multiplicador,
+                    total_a_pagar: precioTotalAplicado.toFixed(2)
+                },
                 data: nuevaReservaQuery.rows[0] 
             });
         } catch (err) {
-            res.status(500).json({ success: false, message: err.message });
+            next(err); // Delega el error al middleware global
         }
     },
 
-    //Eliminar con validación estricta de Resource Ownership
-    async delete(req, res) {
+    // Eliminar con validación estricta de Resource Ownership
+    async delete(req, res, next) {
         try {
             const { id } = req.params;
             const usuarioAutenticado = req.user;
 
-            // 1. Primero consultamos la reserva para verificar a quién pertenece
+            // Consultamos la reserva para verificar a quién pertenece
             const checkReserva = await pool.query('SELECT * FROM reservas WHERE id = $1', [id]);
             
             if (checkReserva.rows.length === 0) {
@@ -107,7 +129,7 @@ const ReservaController = {
 
             const reserva = checkReserva.rows[0];
 
-            //Validar propiedad o rol de administrador
+            // Validar propiedad o rol de administrador
             const esAdmin = usuarioAutenticado.rol === 'admin';
             const esPropietario = reserva.usuario_id === usuarioAutenticado.id;
 
@@ -118,12 +140,18 @@ const ReservaController = {
                 });
             }
 
-            //Proceder con la eliminación si pasa la validación
+            // Eliminación si pasa la validación
             const result = await pool.query('DELETE FROM reservas WHERE id = $1 RETURNING *', [id]);
+            const reservaEliminada = result.rows[0];
+
+            // Sincronización: Liberar la habitación cambiándola a 'Disponible'
+            if (reservaEliminada && reservaEliminada.habitacion_id) {
+                await HabitacionModel.actualizarEstado(reservaEliminada.habitacion_id, 'Disponible');
+            }
             
-            res.json({ success: true, message: 'Reserva eliminada con éxito', data: result.rows[0] });
+            res.json({ success: true, message: 'Reserva eliminada con éxito', data: reservaEliminada });
         } catch (err) {
-            res.status(500).json({ success: false, message: err.message });
+            next(err); // Delega el error al middleware global
         }
     }
 };

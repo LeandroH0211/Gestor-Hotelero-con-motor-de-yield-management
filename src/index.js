@@ -7,6 +7,10 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./config/swagger');
 const runMigrations = require('./config/migrate');
 
+//Importar los middlewares de trazabilidad y errores
+const correlationMiddleware = require('./middlewares/correlation.middleware');
+const errorHandler = require('./middlewares/error.middleware');
+
 const habitacionRoutes = require('./routes/habitacion.routes');
 const reservaRoutes = require('./routes/reserva.routes');
 const authRoutes = require('./routes/auth.routes'); //IMPORTA LAS RUTAS DE AUTH
@@ -14,7 +18,7 @@ const authRoutes = require('./routes/auth.routes'); //IMPORTA LAS RUTAS DE AUTH
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// 1. Configuración de Rate Limiting
+//Configuración de Rate Limiting
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutos
     max: 100, // Límite de 100 peticiones por IP
@@ -30,6 +34,9 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser()); // Habilita la lectura de cookies en req.cookies
 
+//Registrar el middleware de correlación (x-correlation-id) justo después de los parsers
+app.use(correlationMiddleware);
+
 // Documentación Swagger
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
@@ -41,6 +48,9 @@ app.use('/api/auth', authRoutes); // <--- 2. REGISTRA EL ENDPOINT BASE PARA AUTH
 app.get('/', (req, res) => {
     res.json({ message: 'API Gestor Hotelero con Yield Management operando correctamente', docs: '/api-docs' });
 });
+
+//REGISTRAR EL MIDDLEWARE GLOBAL DE ERRORES AL FINAL (Siempre después de todas las rutas)
+app.use(errorHandler);
 
 async function start() {
     try {

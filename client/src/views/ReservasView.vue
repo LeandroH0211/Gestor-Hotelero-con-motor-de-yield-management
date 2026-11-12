@@ -81,7 +81,7 @@
         <h3>¡Reserva Exitosa!</h3>
         <p>Tarifa Base: ${{ form.precio_base }}</p>
         <p>Multiplicador Aplicado: <strong>x{{ resultado.multiplicador_yield }}</strong></p>
-        <p class="final-price">Precio Final Dinámico: ${{ resultado.data.precio_aplicado }}</p>
+        <p class="final-price">Precio Final Dinámico: ${{ resultado.data?.precio_aplicado || resultado.precio_aplicado }}</p>
       </div>
     </div>
   </div>
@@ -111,7 +111,7 @@ export default {
     async cargarHabitacionesDisponibles() {
       try {
         const res = await api.get('/habitaciones');
-        this.habitaciones = res.data.data.filter(h => h.estado === 'Disponible');
+        this.habitaciones = (res.data.data || res.data).filter(h => h.estado === 'Disponible');
       } catch (error) {
         console.error('Error al cargar habitaciones:', error);
       }
@@ -129,7 +129,13 @@ export default {
         alert('¡Reserva creada correctamente!');
         this.cargarHabitacionesDisponibles();
       } catch (error) {
-        alert(error.response?.data?.message || 'Error al procesar la reserva');
+        console.error('Detalle completo del error:', error);
+        
+        // Extraemos correctamente el mensaje que envía el servidor backend
+        const serverError = error.response?.data?.message || error.response?.data?.error || error.response?.data;
+        const mensajeFinal = typeof serverError === 'string' ? serverError : JSON.stringify(serverError) || error.message;
+        
+        alert('Error al procesar la reserva: ' + mensajeFinal);
       }
     }
   },

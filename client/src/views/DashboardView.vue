@@ -26,6 +26,8 @@
             'card-available': hab.estado === 'Disponible',
             'card-busy': hab.estado === 'Ocupada'
           }"
+          @mouseenter="hab.mostrarTooltip = true"
+          @mouseleave="hab.mostrarTooltip = false"
         >
           <!-- Encabezado de la tarjeta con estilo elegante -->
           <div class="hab-header">
@@ -40,6 +42,7 @@
                   }">
               <span class="dot"></span> {{ hab.estado }}
             </span>
+
           </div>
 
           <!-- Cuerpo de la tarjeta -->
@@ -72,6 +75,12 @@
               <span class="price-period">/ noche</span>
             </div>
           </div>
+
+          <!-- TOOLTIP FLOTANTE (Visible solo si está ocupada Y el usuario logueado es Administrador) -->
+          <div v-if="hab.mostrarTooltip && hab.estado === 'Ocupada' && esAdmin" class="tooltip-info">
+            <p><strong>Reservado por:</strong> {{ hab.reservaActiva?.usuario?.nombre || hab.reservaActiva?.cliente_nombre || hab.cliente_nombre || hab.nombre_usuario || 'Huésped registrado' }}</p>
+            <p><small>Desde: {{ hab.reservaActiva?.fecha_inicio || hab.fecha_reserva || hab.fecha_checkin || 'N/A' }}</small></p>
+          </div>
         </div>
       </div>
       
@@ -90,11 +99,23 @@ export default {
       porcentajeOcupacion: '0%'
     };
   },
+  computed: {
+    esAdmin() {
+      // Valida si el usuario activo cuenta con rol de administrador en localStorage
+      const rol = localStorage.getItem('rol') || localStorage.getItem('userRole');
+      const token = localStorage.getItem('token');
+      return token && (rol === 'admin' || rol === 'Administrador' || localStorage.getItem('esAdmin') === 'true');
+    }
+  },
   methods: {
     async cargarHabitaciones() {
       try {
         const res = await api.get('/habitaciones');
-        this.habitaciones = res.data.data;
+        // Mapeamos para inicializar la propiedad reactiva mostrarTooltip en cada habitación
+        this.habitaciones = (res.data.data || res.data).map(hab => ({
+          ...hab,
+          mostrarTooltip: false
+        }));
         this.porcentajeOcupacion = res.data.ocupacion_actual || this.calcularOcupacion();
       } catch (error) {
         console.error('Error al cargar habitaciones:', error);
@@ -104,6 +125,12 @@ export default {
       if (this.habitaciones.length === 0) return '0%';
       const ocupadas = this.habitaciones.filter(h => h.estado === 'Ocupada').length;
       return `${Math.round((ocupadas / this.habitaciones.length) * 100)}%`;
+    }
+  },
+  watch: {
+    // Recarga los datos automáticamente cada vez que el usuario navega hacia esta vista
+    '$route'() {
+      this.cargarHabitaciones();
     }
   },
   mounted() {
@@ -208,11 +235,12 @@ export default {
 
 /* Tarjeta individual detallada */
 .hab-card {
+  position: relative; /* Necesario para posicionar el tooltip flotante dentro de la tarjeta */
   background: linear-gradient(145deg, rgba(30, 41, 59, 0.75) 0%, rgba(15, 23, 42, 0.88) 100%);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-radius: 24px;
-  overflow: hidden;
+  overflow: visible; /* Permite que el tooltip flote por encima del borde de la tarjeta si es necesario */
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.4);
   display: flex;
@@ -372,5 +400,39 @@ export default {
   color: #94a3b8;
   font-weight: 500;
   margin-left: 0.2rem;
+}
+
+/* Estilo del Tooltip flotante */
+.tooltip-info {
+  position: absolute;
+  bottom: 105%;
+  left: 0;
+  width: 100%;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(99, 102, 241, 0.4);
+  padding: 0.85rem;
+  border-radius: 14px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+  z-index: 20;
+  font-size: 0.85rem;
+  color: #e2e8f0;
+  text-align: left;
+  box-sizing: border-box;
+  animation: fadeInTooltip 0.2s ease-in-out;
+}
+
+.tooltip-info p {
+  margin: 0 0 0.2rem 0;
+}
+
+.tooltip-info small {
+  color: #94a3b8;
+}
+
+@keyframes fadeInTooltip {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 </style>

@@ -137,17 +137,37 @@ export default {
       this.nuevoPrecioBase = hab.precio_base;
     },
 
-    async guardarNuevaTarifa() {
+ async guardarNuevaTarifa() {
       try {
-        await api.put(`/habitaciones/${this.habSeleccionada.id}`, {
+        // Obtenemos el token activo para enviarlo explícitamente y evitar el error 401
+        const token = localStorage.getItem('token');
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+        // Enviamos la petición asegurando la inclusión del token en los headers
+        await api.put(`/habitaciones/${this.habSeleccionada.id}/precio`, {
           precio_base: this.nuevoPrecioBase
-        });
+        }, { headers });
+
         alert('¡Tarifa actualizada correctamente!');
         this.habSeleccionada = null;
         await this.cargarHabitaciones();
       } catch (error) {
-        const mensaje = error.response?.data?.error || error.response?.data?.message || 'Error al actualizar la tarifa.';
-        alert('Error: ' + mensaje);
+        // Si el backend usa otra ruta para actualizar, probamos la ruta general de habitaciones con el token
+        try {
+          const token = localStorage.getItem('token');
+          const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+          await api.put(`/habitaciones/${this.habSeleccionada.id}`, {
+            precio_base: this.nuevoPrecioBase
+          }, { headers });
+
+          alert('¡Tarifa actualizada correctamente!');
+          this.habSeleccionada = null;
+          await this.cargarHabitaciones();
+        } catch (err) {
+          const mensaje = err.response?.data?.error || err.response?.data?.message || 'Error al actualizar la tarifa.';
+          alert('Error: ' + mensaje);
+        }
       }
     },
 
